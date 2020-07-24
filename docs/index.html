@@ -3,8 +3,34 @@
 	<head>
 		<meta charset="UTF-8" />
 		<title>Dragalia Lost Summoning Strategy Calculator</title>
+		<link rel="stylesheet" href="index.css">
+		<script type="application/javascript" src="./index.js" defer></script>
 	</head>
 	<body>
+		<h1>Dragalia Lost Summoning Strategy Calculator</h1>
 
+		<label for="numberOfSummons">Number of Summons</label>
+		<input id="numberOfSummons" type="number" min="10" max="1000" step="1" value="120" />
+
+		<br/><br/>
+
+		<fieldset>
+			<legend>Summon Rates</legend>
+
+			<label for="summonRateType">Summon Type</label>
+			<select id="summonRateType">
+				<option value="0.06">Gala (6%)</option>
+				<option value="0.04">Normal (4%)</option>
+				<option value="">Custom</option>
+			</select>
+
+			<label for="customSummonRate">Custom Summon Rate</label>
+			<input id="customSummonRate" type="number" min="0" max="1" step="any" value="0.05" />
+
+			<br/><br/>
+
+			<label for="pityIncrease">Pity Increase</label>
+			<input id="pityIncrease" type="number" min="0" max="1" step="any" value="0.005" />
+		</fieldset>
 	</body>
 </html>
