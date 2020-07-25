@@ -22,6 +22,7 @@ updateCustomSummonRateInputVisibility();
 
 /**
  * Expected value calculation code
+ * For explanations, see https://github.com/SaurabhTotey/Dragalia-Lost-Summon-Strategy/blob/master/Strategy.ipynb
  */
 
 const productOfRange = (start, stop) => [...Array(stop - start + 1).keys()].reduce((product, value) => product * (value + start), 1);
@@ -32,9 +33,8 @@ const nCr = (n, r) => {
 const pow = (a, b) => [...Array(b)].reduce(product => product * a, 1);
 const tenChooseTable = [...Array(11).keys()].map(i => nCr(10, i));
 
-const lookupTable = {};
-function E(n, r, s, l, p, q) {
-	const key = `${n},${r},${s},${l}`;
+async function E(n, r, s, l, p, q, lookupTable = {}) {
+	const key = `${n},${r},${l}`;
 	if (key in lookupTable) {
 		return lookupTable[key];
 	}
@@ -53,11 +53,11 @@ function E(n, r, s, l, p, q) {
 		if ((l + 1) % 10 === 0) {
 			rateOnFailure += q;
 		}
-		expectedValue = r * (1 + E(n - 1, p, s, 0, p, q)) +
-			failureProbability * E(n - 1, rateOnFailure, s, l + 1, p, q);
+		expectedValue = r * (1 + await E(n - 1, p, s, 0, p, q, lookupTable)) +
+			failureProbability * await E(n - 1, rateOnFailure, s, l + 1, p, q, lookupTable);
 	} else {
-		const expectedValueAfterSuccess = E(n - 10, p, s, 0, p, q);
-		expectedValue = pow(failureProbability, 10) * E(n - 10, r + q, s, l, p, q) +
+		const expectedValueAfterSuccess = await E(n - 10, p, s, 0, p, q, lookupTable);
+		expectedValue = pow(failureProbability, 10) * await E(n - 10, r + q, s, l, p, q, lookupTable) +
 			[...Array(10).keys()].map(i => tenChooseTable[i + 1] * pow(r, i + 1) * pow(failureProbability, 10 - i - 1) * (i + 1 + expectedValueAfterSuccess)).reduce((total, current) => total  + current, 0);
 	}
 
@@ -66,5 +66,21 @@ function E(n, r, s, l, p, q) {
 }
 
 /**
- * TODO: actually useful stuff
+ * Handles managing the parameters and calculations and updating the page with the relevant information
  */
+const summaryParagraph = document.getElementById("summary");
+const numberSummonsInput = document.getElementById("numberOfSummons");
+const pityIncreaseInput = document.getElementById("pityIncrease");
+
+async function refresh() {
+	summaryParagraph.innerText = "Loading...";
+
+	const numberSummons = parseInt(numberSummonsInput.value);
+	const baseRate = Number(summonRateTypeSelector.options[summonRateTypeSelector.selectedIndex].value);
+	const pityIncrease = Number(pityIncreaseInput.value);
+
+	const calculations = [...Array(Math.floor(numberSummons / 10) + 1).keys()].map(strategy => E(numberSummons, baseRate, strategy, 0, baseRate, pityIncrease));
+	const expectedValues = await Promise.all(calculations);
+	console.log(expectedValues);
+}
+refresh();
