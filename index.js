@@ -21,9 +21,19 @@ summonRateTypeSelector.onchange = updateCustomSummonRateInputVisibility;
 updateCustomSummonRateInputVisibility();
 
 /**
- * TODO: actual calculation code
+ * Expected value calculation code
  */
 
+const productOfRange = (start, stop) => [...Array(stop - start + 1).keys()].reduce((product, value) => product * (value + start), 1);
+const nCr = (n, r) => {
+	const biggerR = Math.max(r, n - r);
+	return productOfRange(biggerR + 1, n) / productOfRange(1, n - biggerR);
+};
+
+const lookupTable = {};
+function E(n, r, s, l) {
+
+}
 
 /**
  * TODO: actually useful stuff
