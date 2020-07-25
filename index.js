@@ -20,6 +20,13 @@ const updateCustomSummonRateInputVisibility = () => {
 summonRateTypeSelector.onchange = updateCustomSummonRateInputVisibility;
 updateCustomSummonRateInputVisibility();
 
+// Updates the wyrmite cost display
+const numberSummonsInput = document.getElementById("numberOfSummons");
+const wyrmiteCostOutput = document.getElementById("wyrmiteCost");
+const updateWyrmiteCost = () => { wyrmiteCostOutput.innerText = `${parseInt(numberSummonsInput.value) * 120}`; };
+numberSummonsInput.onchange = updateWyrmiteCost;
+updateWyrmiteCost();
+
 /**
  * Expected value calculation code
  * For explanations, see https://github.com/SaurabhTotey/Dragalia-Lost-Summon-Strategy/blob/master/Strategy.ipynb
@@ -69,7 +76,6 @@ function E(n, r, s, l, p, q, lookupTable = {}) {
  * Handles managing the parameters and calculations and updating the page with the relevant information
  */
 const summaryParagraph = document.getElementById("summary");
-const numberSummonsInput = document.getElementById("numberOfSummons");
 const pityIncreaseInput = document.getElementById("pityIncrease");
 
 async function refresh() {
