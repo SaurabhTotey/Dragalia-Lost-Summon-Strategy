@@ -72,14 +72,15 @@ const summaryParagraph = document.getElementById("summary");
 const numberSummonsInput = document.getElementById("numberOfSummons");
 const pityIncreaseInput = document.getElementById("pityIncrease");
 
-function refresh() {
+async function refresh() {
 	summaryParagraph.innerText = "Loading...";
 
 	const numberSummons = parseInt(numberSummonsInput.value);
 	const baseRate = Number(summonRateTypeSelector.options[summonRateTypeSelector.selectedIndex].value);
 	const pityIncrease = Number(pityIncreaseInput.value);
 
-	const expectedValues = [...Array(Math.floor(numberSummons / 10) + 1).keys()].map(strategy => E(numberSummons, baseRate, strategy, 0, baseRate, pityIncrease));
+	const calculations = [...Array(Math.floor(numberSummons / 10) + 1).keys()].map(async strategy => E(numberSummons, baseRate, strategy, 0, baseRate, pityIncrease));
+	const expectedValues = await Promise.all(calculations);
 	console.log(expectedValues);
 }
 refresh();
