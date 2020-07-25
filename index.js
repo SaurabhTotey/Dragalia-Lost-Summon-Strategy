@@ -29,10 +29,40 @@ const nCr = (n, r) => {
 	const biggerR = Math.max(r, n - r);
 	return productOfRange(biggerR + 1, n) / productOfRange(1, n - biggerR);
 };
+const pow = (a, b) => [...Array(b)].reduce(product => product * a, 1);
+const tenChooseTable = [...Array(11).keys()].map(i => nCr(10, i));
 
 const lookupTable = {};
-function E(n, r, s, l) {
+function E(n, r, s, l, p, q) {
+	const key = `${n},${r},${s},${l}`;
+	if (key in lookupTable) {
+		return lookupTable[key];
+	}
 
+	if (n === 0) {
+		return 0;
+	} else if (n === 1) {
+		return r;
+	}
+
+	const failureProbability = 1 - r;
+	let expectedValue;
+
+	if (l < 10 * s || n < 10) {
+		let rateOnFailure = r;
+		if ((l + 1) % 10 === 0) {
+			rateOnFailure += q;
+		}
+		expectedValue = r * (1 + E(n - 1, p, s, 0, p, q)) +
+			failureProbability * E(n - 1, rateOnFailure, s, l + 1, p, q);
+	} else {
+		const expectedValueAfterSuccess = E(n - 10, p, s, 0, p, q);
+		expectedValue = pow(failureProbability, 10) * E(n - 10, r + q, s, l, p, q) +
+			[...Array(10).keys()].map(i => tenChooseTable[i + 1] * pow(r, i + 1) * pow(failureProbability, 10 - i - 1) * (i + 1 + expectedValueAfterSuccess)).reduce((total, current) => total  + current, 0);
+	}
+
+	lookupTable[key] = expectedValue;
+	return expectedValue;
 }
 
 /**
