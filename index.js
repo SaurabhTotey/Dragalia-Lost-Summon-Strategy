@@ -38,7 +38,6 @@ const nCr = (n, r) => {
 	const biggerR = Math.max(r, n - r);
 	return productOfRange(biggerR + 1, n) / productOfRange(1, n - biggerR);
 };
-const pow = (a, b) => [...Array(b)].reduce(product => product * a, 1);
 const tenChooseTable = [...Array(11).keys()].map(i => nCr(10, i));
 
 // Expected value function
@@ -66,8 +65,8 @@ function E(n, r, s, l, p, q, lookupTable = {}) {
 			failureProbability * E(n - 1, rateOnFailure, s, l + 1, p, q, lookupTable);
 	} else {
 		const expectedValueAfterSuccess = E(n - 10, p, s, 0, p, q, lookupTable);
-		expectedValue = pow(failureProbability, 10) * E(n - 10, r + q, s, l, p, q, lookupTable) +
-			[...Array(10).keys()].map(i => tenChooseTable[i + 1] * pow(r, i + 1) * pow(failureProbability, 10 - i - 1) * (i + 1 + expectedValueAfterSuccess)).reduce((total, current) => total  + current, 0);
+		expectedValue = Math.pow(failureProbability, 10) * E(n - 10, r + q, s, l, p, q, lookupTable) +
+			[...Array(10).keys()].map(i => tenChooseTable[i + 1] * Math.pow(r, i + 1) * Math.pow(failureProbability, 10 - i - 1) * (i + 1 + expectedValueAfterSuccess)).reduce((total, current) => total  + current, 0);
 	}
 
 	lookupTable[key] = expectedValue;
@@ -80,16 +79,18 @@ function E(n, r, s, l, p, q, lookupTable = {}) {
 
 const summaryParagraph = document.getElementById("summary");
 const pityIncreaseInput = document.getElementById("pityIncrease");
+const plot = document.getElementById("plot");
 
 async function refresh() {
 	summaryParagraph.innerText = "Loading...";
+	plot.innerHTML = '';
 
 	// Pull relevant parameters from form
 	const numberSummons = parseInt(numberSummonsInput.value);
 	const baseRate = Number(summonRateTypeSelector.options[summonRateTypeSelector.selectedIndex].value);
 	const pityIncrease = Number(pityIncreaseInput.value);
 
-	// Perform calculations asynchronously
+	// Perform calculations asynchronously TODO: check out web workers
 	const calculations = [...Array(Math.floor(numberSummons / 10) + 1).keys()].map(async strategy => E(numberSummons, baseRate, strategy, 0, baseRate, pityIncrease));
 	const expectedValues = await Promise.all(calculations);
 	const bestStrategy = expectedValues.reduce((indexOfMax, value, i) => value > expectedValues[indexOfMax] ? i : indexOfMax, 0);
