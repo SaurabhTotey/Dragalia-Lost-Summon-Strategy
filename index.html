@@ -5,43 +5,46 @@
 		<title>Dragalia Lost Summoning Strategy Calculator</title>
 		<link rel="stylesheet" href="index.css">
 		<script type="application/javascript" src="index.js" defer></script>
+		<script src="https://d3js.org/d3.v5.min.js"></script>
 	</head>
 	<body>
 		<h1>Dragalia Lost Summoning Strategy Calculator</h1>
 
-		<label for="numberOfSummons">Number of Summons</label>
-		<input id="numberOfSummons" type="number" min="10" max="1000" step="1" value="120" />
-
-		<br/><br/>
-
-		<fieldset>
-			<legend>Summon Rates</legend>
-
-			<label for="summonRateType">Summon Type</label>
-			<select id="summonRateType">
-				<option value="0.06">Gala (6%)</option>
-				<option value="0.04">Normal (4%)</option>
-				<option id="customSummonRateOption" value="">Custom</option>
-			</select>
-
-			<label for="customSummonRate" id="customSummonRateLabel">Custom Summon Rate</label>
-			<input id="customSummonRate" type="number" min="0" max="1" step="any" value="0.05" />
+		<form>
+			<label for="numberOfSummons">Number of Summons: </label>
+			<input id="numberOfSummons" type="number" min="10" max="1000" step="1" value="120" />
 
 			<br/><br/>
 
-			<label for="pityIncrease">Pity Increase</label>
-			<input id="pityIncrease" type="number" min="0" max="1" step="any" value="0.005" />
-		</fieldset>
+			<fieldset id="summonRatesInput">
+				<legend>Summon Rates</legend>
 
-		<br/>
+				<label for="summonRateType">Summon Type: </label>
+				<select id="summonRateType">
+					<option value="0.06">Gala (6%)</option>
+					<option value="0.04">Normal (4%)</option>
+					<option id="customSummonRateOption" value="">Custom</option>
+				</select>
 
-		<button>Calculate best strategy!</button>
+				<label for="customSummonRate" id="customSummonRateLabel">Custom Summon Rate: </label>
+				<input id="customSummonRate" type="number" min="0" max="1" step="0.01" value="0.05" />
 
-		<br/><br/>
+				<br/><br/>
 
-		<hr/>
+				<label for="pityIncrease">Pity Increase: </label>
+				<input id="pityIncrease" type="number" min="0" max="1" step="0.001" value="0.005" />
+			</fieldset>
+
+			<br/>
+
+			<button id="submit">Calculate best strategy!</button>
+		</form>
+
+		<br/><hr/>
 
 		<h1>Results</h1>
-		TODO:
+		<p id="summary">Loading...</p>
+		<div id="plot"></div>
+
 	</body>
 </html>

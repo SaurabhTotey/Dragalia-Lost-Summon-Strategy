@@ -21,5 +21,10 @@ summonRateTypeSelector.onchange = updateCustomSummonRateInputVisibility;
 updateCustomSummonRateInputVisibility();
 
 /**
+ * TODO: actual calculation code
+ */
+
+
+/**
  * TODO: actually useful stuff
  */
