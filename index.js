@@ -97,8 +97,8 @@ async function refresh() {
 	// TODO: scatter plot for data
 
 	// Updates the output summary
-	summaryParagraph.innerText = `The best strategy for ${numberSummons} is to perform ${bestStrategy * 10} single summons before only doing tenfold summons.`
+	summaryParagraph.innerText = `The best strategy for ${numberSummons} summons is to perform ${bestStrategy * 10} single summons before only doing tenfold summons.`
 		+ ` Once a 5-star unit has been obtained, restart from the beginning of the strategy, even if the 5-star unit was obtained with single summons.`
-		+ ` With this strategy, you can expect around ${expectedValues[bestStrategy]} 5-star units on average.`;
+		+ ` With this strategy, you can expect around ${expectedValues[bestStrategy].toFixed(4)} 5-star units on average.`;
 }
 refresh();
