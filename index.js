@@ -28,52 +28,6 @@ numberSummonsInput.onchange = updateWyrmiteCost;
 updateWyrmiteCost();
 
 /**
- * Expected value calculation code
- * For explanations, see https://github.com/SaurabhTotey/Dragalia-Lost-Summon-Strategy/blob/master/Strategy.ipynb
- */
-
-// Utility functions
-const productOfRange = (start, stop) => [...Array(stop - start + 1).keys()].reduce((product, value) => product * (value + start), 1);
-const nCr = (n, r) => {
-	const biggerR = Math.max(r, n - r);
-	return productOfRange(biggerR + 1, n) / productOfRange(1, n - biggerR);
-};
-const tenChooseTable = [...Array(11).keys()].map(i => nCr(10, i));
-
-// Expected value function
-function E(n, r, s, l, p, q, lookupTable = {}) {
-	const key = `${n},${r},${l}`;
-	if (key in lookupTable) {
-		return lookupTable[key];
-	}
-
-	if (n === 0) {
-		return 0;
-	} else if (n === 1) {
-		return r;
-	}
-
-	const failureProbability = 1 - r;
-	let expectedValue;
-
-	if (l < 10 * s || n < 10) {
-		let rateOnFailure = r;
-		if ((l + 1) % 10 === 0) {
-			rateOnFailure += q;
-		}
-		expectedValue = r * (1 + E(n - 1, p, s, 0, p, q, lookupTable)) +
-			failureProbability * E(n - 1, rateOnFailure, s, l + 1, p, q, lookupTable);
-	} else {
-		const expectedValueAfterSuccess = E(n - 10, p, s, 0, p, q, lookupTable);
-		expectedValue = Math.pow(failureProbability, 10) * E(n - 10, r + q, s, l, p, q, lookupTable) +
-			[...Array(10).keys()].map(i => tenChooseTable[i + 1] * Math.pow(r, i + 1) * Math.pow(failureProbability, 10 - i - 1) * (i + 1 + expectedValueAfterSuccess)).reduce((total, current) => total  + current, 0);
-	}
-
-	lookupTable[key] = expectedValue;
-	return expectedValue;
-}
-
-/**
  * Handles managing the parameters and calculations and updating the page with the relevant information
  */
 
@@ -81,25 +35,32 @@ const summaryParagraph = document.getElementById("summary");
 const pityIncreaseInput = document.getElementById("pityIncrease");
 const plot = document.getElementById("plot");
 
-async function refresh() {
+// Set up a worker that will run the calculations in the background
+let worker;
+
+function runCalculations() {
+	// Clear everything up to either start or restart the worker
 	summaryParagraph.innerText = "Loading...";
 	plot.innerHTML = '';
+	worker && worker.terminate();
+	worker = new Worker("./ExpectedValueCalculator.js");
+
+	// Define what happens when the worker sends over the finished calculations
+	worker.onmessage = message => {
+		const expectedValues = message.data.expectedValues;
+		const bestStrategy = expectedValues.reduce((indexOfMax, value, i) => value > expectedValues[indexOfMax] ? i : indexOfMax, 0);
+		summaryParagraph.innerText = `The best strategy for ${numberSummons} summons is to perform ${bestStrategy * 10} single summons before only doing tenfold summons.`
+			+ ` Once a 5-star unit has been obtained, restart from the beginning of the strategy, even if the 5-star unit was obtained with single summons.`
+			+ ` With this strategy, you can expect around ${expectedValues[bestStrategy].toFixed(4)} 5-star units on average.`;
+		//TODO: plot
+	};
 
 	// Pull relevant parameters from form
 	const numberSummons = parseInt(numberSummonsInput.value);
 	const baseRate = Number(summonRateTypeSelector.options[summonRateTypeSelector.selectedIndex].value);
 	const pityIncrease = Number(pityIncreaseInput.value);
 
-	// Perform calculations asynchronously TODO: check out web workers
-	const calculations = [...Array(Math.floor(numberSummons / 10) + 1).keys()].map(async strategy => E(numberSummons, baseRate, strategy, 0, baseRate, pityIncrease));
-	const expectedValues = await Promise.all(calculations);
-	const bestStrategy = expectedValues.reduce((indexOfMax, value, i) => value > expectedValues[indexOfMax] ? i : indexOfMax, 0);
-
-	// TODO: scatter plot for data
-
-	// Updates the output summary
-	summaryParagraph.innerText = `The best strategy for ${numberSummons} summons is to perform ${bestStrategy * 10} single summons before only doing tenfold summons.`
-		+ ` Once a 5-star unit has been obtained, restart from the beginning of the strategy, even if the 5-star unit was obtained with single summons.`
-		+ ` With this strategy, you can expect around ${expectedValues[bestStrategy].toFixed(4)} 5-star units on average.`;
+	// Tells the worker to start the calculations
+	worker.postMessage({ numberSummons: numberSummons, baseRate: baseRate, pityIncrease: pityIncrease });
 }
-refresh();
+runCalculations();
