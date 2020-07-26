@@ -63,6 +63,11 @@ function runCalculations() {
 			const height = Math.floor(Math.min(window.innerHeight * 0.8, width));
 			const margins = { left: Math.max(75, Math.floor(width / 10)), right: Math.floor(width / 10),  top: Math.floor(height / 10), bottom: Math.max(75, Math.floor(height / 10)) }
 
+			const tooltip = d3.select("#plot")
+				.append("div")
+				.attr("id", "tooltip")
+				.style("opacity", "0");
+
 			const svg = d3.select("#plot")
 				.append("svg")
 					.attr("width", width).attr("height", height)
@@ -79,7 +84,20 @@ function runCalculations() {
 				.append("circle")
 					.attr("cx", d => xAxis(d.strategy))
 					.attr("cy", d => yAxis(d.expectedValue))
-					.attr("r", 5);
+					.attr("r", 5)
+				.on("mouseover", d => {
+					tooltip.transition()
+						.duration(200)
+						.style("opacity", .9);
+					tooltip.html(`Strategy ${d.strategy} has an expected value of ${d.expectedValue.toFixed(4)}.`)
+						.style("left", `${d3.event.pageX - 150}px`)
+						.style("top", `${d3.event.pageY - 50}px`);
+				})
+				.on("mouseout", () => {
+					tooltip.transition()
+						.duration(500)
+						.style("opacity", 0);
+				});
 
 			svg.append("text")
 				.attr("transform", `translate(${(width - margins.left - margins.right) / 2}, ${height * 0.85})`)
@@ -92,7 +110,7 @@ function runCalculations() {
 			svg.append("text")
 				.attr("transform", `translate(${(width - margins.left - margins.right) / 2}, ${0})`)
 				.style("text-anchor", "middle")
-				.text("Expected Value vs. Strategy")
+				.text("Expected Value vs. Strategy");
 		};
 		window.onresize = makePlot;
 		makePlot();

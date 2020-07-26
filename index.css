@@ -45,3 +45,8 @@ hr {
 		display: inline;
 	}
 }
+
+#tooltip {
+	position: absolute;
+	text-align: center;
+}
