@@ -61,7 +61,7 @@ function runCalculations() {
 
 			const width = Math.floor(window.innerWidth * 0.8);
 			const height = Math.floor(Math.min(window.innerHeight * 0.8, width));
-			const margins = { left: Math.floor(width / 10), right: Math.floor(width / 10),  top: Math.floor(height / 10), bottom: Math.floor(height / 10) }
+			const margins = { left: Math.max(75, Math.floor(width / 10)), right: Math.floor(width / 10),  top: Math.floor(height / 10), bottom: Math.max(75, Math.floor(height / 10)) }
 
 			const svg = d3.select("#plot")
 				.append("svg")
@@ -80,6 +80,19 @@ function runCalculations() {
 					.attr("cx", d => xAxis(d.strategy))
 					.attr("cy", d => yAxis(d.expectedValue))
 					.attr("r", 5);
+
+			svg.append("text")
+				.attr("transform", `translate(${(width - margins.left - margins.right) / 2}, ${height * 0.85})`)
+				.style("text-anchor", "middle")
+				.text("Strategy");
+			svg.append("text")
+				.attr("transform", `rotate(-90) translate(${-(height - margins.top - margins.bottom) / 2}, ${-margins.left / 2})`)
+				.style("text-anchor", "middle")
+				.text("Expected Value");
+			svg.append("text")
+				.attr("transform", `translate(${(width - margins.left - margins.right) / 2}, ${0})`)
+				.style("text-anchor", "middle")
+				.text("Expected Value vs. Strategy")
 		};
 		window.onresize = makePlot;
 		makePlot();
