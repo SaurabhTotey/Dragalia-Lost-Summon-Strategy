@@ -55,30 +55,34 @@ function runCalculations() {
 			+ ` Once a 5-star unit has been obtained, restart from the beginning of the strategy, even if the 5-star unit was obtained with single summons.`
 			+ ` With this strategy, you can expect around ${expectedValues[bestStrategy].toFixed(4)} 5-star units on average.`;
 
-		// Scatter plot TODO: redo this on window resize
+		// Makes a scatter plot and remakes it every time the window size changes
+		const makePlot = () => {
+			plot.innerHTML = '';
 
-		const width = Math.floor(window.innerWidth * 0.8);
-		const height = Math.floor(Math.min(window.innerHeight * 0.8, width));
-		const margins = { left: Math.floor(width / 10), right: Math.floor(width / 10),  top: Math.floor(height / 10), bottom: Math.floor(height / 10) }
+			const width = Math.floor(window.innerWidth * 0.8);
+			const height = Math.floor(Math.min(window.innerHeight * 0.8, width));
+			const margins = { left: Math.floor(width / 10), right: Math.floor(width / 10),  top: Math.floor(height / 10), bottom: Math.floor(height / 10) }
 
-		const svg = d3.select("#plot")
-			.append("svg")
-				.attr("width", width).attr("height", height)
-			.append("g")
-				.attr("transform", `translate(${margins.left}, ${margins.top})`);
-		const xAxis = d3.scaleLinear().domain([-0.5, expectedValues.length - 0.5]).range([0, width - margins.left - margins.right]);
-		const yAxis = d3.scaleLinear().domain([Math.min(...expectedValues) - 0.02, expectedValues[bestStrategy] + 0.02]).range([height - margins.top - margins.bottom, 0]);
-		svg.append("g").attr("transform", `translate(0, ${height - margins.top - margins.bottom})`).call(d3.axisBottom(xAxis));
-		svg.append("g").call(d3.axisLeft(yAxis));
+			const svg = d3.select("#plot")
+				.append("svg")
+					.attr("width", width).attr("height", height)
+				.append("g")
+					.attr("transform", `translate(${margins.left}, ${margins.top})`);
+			const xAxis = d3.scaleLinear().domain([-0.5, expectedValues.length - 0.5]).range([0, width - margins.left - margins.right]);
+			const yAxis = d3.scaleLinear().domain([Math.min(...expectedValues) - 0.02, expectedValues[bestStrategy] + 0.02]).range([height - margins.top - margins.bottom, 0]);
+			svg.append("g").attr("transform", `translate(0, ${height - margins.top - margins.bottom})`).call(d3.axisBottom(xAxis));
+			svg.append("g").call(d3.axisLeft(yAxis));
 
-		svg.append("g")
-			.selectAll("dot")
-			.data(expectedValues.map((expectedValue, i) => { return { strategy: i, expectedValue: expectedValue }; }))
-			.enter()
-			.append("circle")
-				.attr("cx", d => xAxis(d.strategy))
-				.attr("cy", d => yAxis(d.expectedValue))
-				.attr("r", 5)
+			svg.append("g").selectAll("dot")
+				.data(expectedValues.map((expectedValue, i) => { return { strategy: i, expectedValue: expectedValue }; }))
+				.enter()
+				.append("circle")
+					.attr("cx", d => xAxis(d.strategy))
+					.attr("cy", d => yAxis(d.expectedValue))
+					.attr("r", 5);
+		};
+		window.onresize = makePlot;
+		makePlot();
 	};
 
 	// Pull relevant parameters from form
